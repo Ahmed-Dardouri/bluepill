@@ -1,10 +1,24 @@
+#-{ Predefined Projects }-------------------------------------------------------
+
+# Define valid projects
+VALID_PROJECTS := blink gpio_drv
+
+# Default project (can be overridden by user)
+PROJECT ?= NO_PROJECT_SELECTED
+
+# Check if the selected project is valid
+ifneq ($(filter $(PROJECT),$(VALID_PROJECTS)), $(PROJECT))
+$(error Invalid project "$(PROJECT)"! Valid options are: $(VALID_PROJECTS))
+endif
+
 
 #-{ Project Relative Paths }----------------------------------------------------
 
-BLD = ./build
-CORE_SRC = $(wildcard ./core/*.c)
-SRC = $(wildcard ./blink/*.c) # to be changed later depending on project
-
+BLD 			= ./build/$(PROJECT)
+CORE_SRC 		= $(wildcard ./core/src/*.c)
+CORE_INC 		= ./core/inc
+PROJECT_SRC 	= $(wildcard ./$(PROJECT)/src/*.c)
+PROJECT_INC 	= ./$(PROJECT)/inc
 
 #-{ Compiler Definitions }------------------------------------------------------
 
@@ -14,10 +28,7 @@ CC = arm-none-eabi-gcc
 # Device specific flags [1]
 DFLAGS = -mcpu=cortex-m3 -mthumb -nostdlib
 # Compiler flags
-CFLAGS = $(DFLAGS) -g -Wall -Wextra
-
-# Linker
-LD = arm-none-eabi-gcc
+CFLAGS = $(DFLAGS) -g -Wall -Wextra -I$(CORE_INC) -I$(PROJECT_INC)
 
 # Path to linker script
 LSCRIPT = ./linker.ld
@@ -31,9 +42,6 @@ OFLAGS = -O binary
 
 #-{ Programming/Debugging Definitions }-----------------------------------------
 
-# Debugger
-DBG = arm-none-eabi-gdb
-
 # Flashing tool
 FLASH = st-flash
 
@@ -42,8 +50,8 @@ FLASH_ADDR = 0x8000000
 #-{ Build Rules }---------------------------------------------------------------
 
 # Final binaries
-BIN = $(BLD)/blink.bin
-ELF = $(BLD)/blink.elf
+BIN = $(BLD)/$(PROJECT).bin
+ELF = $(BLD)/$(PROJECT).elf
 
 #-- These rules for the finally binaries will usually not require modification
 
@@ -52,7 +60,7 @@ $(BIN): $(ELF)
 	$(OBJCOPY) $(OFLAGS) $^ $@
 
 # Link all intermediate objects into a single executable
-$(ELF): $(SRC) $(CORE_SRC) | $(BLD)
+$(ELF): $(PROJECT_SRC) $(CORE_SRC) | $(BLD)
 	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@
 
 $(BLD):
@@ -73,4 +81,4 @@ all: $(BIN)
 
 # Delete all of the generated files
 clean:
-	rm -rf $(BLD) $(BIN) $(ELF)
+	rm -rf $(BLD)

@@ -1,0 +1,11 @@
+Flash cmd: ST-LINK_CLI -c SWD FREQ=4000 -ME -P .\blink.hex 0x08000000 -V
+build command: arm-none-eabi-gcc blink.c startup.c -T linker.ld -o blink.elf -mcpu=cortex-m3 -mthumb -nostdlib
+conver elf to hex: arm-none-eabi-objcopy -O ihex .\blink.elf blink.hex
+
+gotta add makefile
+
+
+linux env:
+flash tool: st-flash (install stlink-tools package)
+flash command: st-flash write blink.bin 0x8000000
+used bin instead of ihex for convenience
