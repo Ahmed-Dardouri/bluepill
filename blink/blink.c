@@ -34,7 +34,7 @@ void Internal_LED_Toggle(void);
 
 
 
-void main(void){
+int main(void){
 
     /* init */
     *RCC_APB2ENR |= ((uint32_t)(1 << RCC_AHB2ENR_IOPCEN));
